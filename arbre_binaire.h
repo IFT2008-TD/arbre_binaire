@@ -26,26 +26,36 @@ private:
 
 public:
 
+    // Constructeur et règle des 3
+
     ArbreBinaire(std::initializer_list<V> en_ordre, std::initializer_list<V> pre_ordre) ;
     ArbreBinaire(const ArbreBinaire<V>& source) ;
     ~ArbreBinaire() ;
     ArbreBinaire<V>& operator = (ArbreBinaire<V> rhs) ;
+
+    // Itérateurs
 
     std::vector<V> visiterEnOrdre () const ;
     std::vector<V> visiterPreOrdre () const ;
     std::vector<V> visiterParNiveau () const ;
 
 private:
+
+    // Fonctions auxiliaires pour la règle des 3
+
+    static bool listes_valides(std::vector<V> en_ordre, std::vector<V> pre_ordre) ;
     Arbre* construireSousArbre(const std::vector<V>& en_ordre, size_t deo, size_t leo, const std::vector<V>& pre_ordre, size_t dpo) ;
     Arbre* copierLeSousArbreEnPreOrdre(Arbre* rhs_root) ;
     void detruireLeSousArbreEnPostOrdre(Arbre* root) ;
 
-private:
-    Arbre * racine ;
-    static bool listes_valides(std::vector<V> en_ordre, std::vector<V> pre_ordre) ;
+    // Fonctions auxiliaires des itérateurs
 
     void visiterEnOrdreLeSousArbre(Arbre* root, std::vector<V>& resultat) const ;
     void visiterPreOrdreLeSousArbre(Arbre* root, std::vector<V>& resultat) const ;
+
+
+private:
+    Arbre * racine ;
 
 
 };
@@ -103,6 +113,7 @@ ArbreBinaire<V>::construireSousArbre(const std::vector<V>& en_ordre, size_t deo,
 
     V element_racine = pre_ordre.at(dpo) ;
     auto lg = static_cast<size_t>(std::find(en_ordre.begin(), en_ordre.end(), element_racine) - en_ordre.begin()) - deo ;
+    if (lg >= leo) throw std::runtime_error("construireSousArbre: racine non trouvée.") ;
     size_t ld = leo - lg - 1 ;
 
     auto* root = new Arbre(element_racine) ;
@@ -144,9 +155,7 @@ void ArbreBinaire<V>::visiterPreOrdreLeSousArbre(ArbreBinaire::Arbre *root, std:
 }
 
 template<typename V>
-ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSousArbreEnPreOrdre(source.racine)) {
-
-}
+ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSousArbreEnPreOrdre(source.racine)) {}
 
 template<typename V>
 ArbreBinaire<V>::~ArbreBinaire() {
