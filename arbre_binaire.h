@@ -10,10 +10,17 @@
 #include <queue>
 #include <algorithm>
 
+/**
+ * @class Classe représentant un arbre binaire: la racine est le seul sommet d'ordre 2, les feuilles sont d'ordre 1 et
+ * tous les noeuds internes sont d'ordre 3. Voir README pour une description complète.
+ * @tparam V
+ */
 template <typename V>
 class ArbreBinaire {
 
 private:
+
+    // Type privé Arbre: tout arbre binaire est un sommet comportant deux sous-arbres.
 
     struct Arbre {
 
@@ -55,10 +62,15 @@ private:
 
 
 private:
+
+    // Le seul attribut: la racine du sommet.
+
     Arbre * racine ;
 
 
 };
+
+// Implantation dans ce fichier
 
 #include "arbre_binaire.hpp"
 
