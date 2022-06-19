@@ -27,6 +27,37 @@ ArbreBinaire<V>::ArbreBinaire(std::initializer_list<V> liste_en_ordre, std::init
 }
 
 /**
+ * Constructeur de copie.
+ * @tparam V
+ * @param source Arbre à copier.
+ * @except Utilise new, donc bad_alloc est possible
+ */
+template<typename V>
+ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSousArbreEnPreOrdre(source.racine)) {}
+
+/**
+ * Destructeur.
+ * @tparam V
+ */
+template<typename V>
+ArbreBinaire<V>::~ArbreBinaire() {
+    detruireLeSousArbreEnPostOrdre(racine) ;
+}
+
+/**
+ * Opérateur d'assignation en sémantique copy-swap.
+ * @tparam V
+ * @param rhs Membre de droite de l'assignation.
+ * @return L'objet courant après l'assignation.
+ */
+template<typename V>
+ArbreBinaire<V> &ArbreBinaire<V>::operator=(ArbreBinaire<V> rhs) {
+    std::swap(racine, rhs.racine) ;
+    return *this ;
+}
+
+
+/**
  * Énumère les éléments d'un arbre lors d'une visite en-ordre, le sous-arbre gauche ayant priorité sur le sous-
  * arbre droite.
  * @tparam V
@@ -51,7 +82,7 @@ std::vector<V> ArbreBinaire<V>::visiterEnOrdre() const {
 template<typename V>
 std::vector<V> ArbreBinaire<V>::visiterPreOrdre() const {
     std::vector<V> resultat ;
-    visiterPreOrdreLeSousArbre(racine, resultat) ;
+    visiterEnPreOrdreLeSousArbre(racine, resultat) ;
 
     return resultat ;
 }
@@ -79,6 +110,27 @@ std::vector<V> ArbreBinaire<V>::visiterParNiveau() const {
         if (prochain->droite) attente.push(prochain->droite) ;
     }
     return resultat ;
+}
+
+/**
+ * Fonction auxiliaire de validation des listes d'initialisation du constructeur.  Les deux visites doivent contenir
+ * le même nombre d'éléments, doivent avoir les mêmes éléments et ne peuvent comporter de doublons.
+ * @tparam V
+ * @param en_ordre Vecteur de la visite en ordre
+ * @param pre_ordre Vecteur de la visite pré ordre
+ * @return
+ */
+template<typename V>
+bool ArbreBinaire<V>::listes_valides(std::vector<V> en_ordre, std::vector<V> pre_ordre) {
+    if (en_ordre.size() != pre_ordre.size()) return false ;
+
+    std::set<V> set_en_ordre(en_ordre.begin(), en_ordre.end()) ;
+    std::set<V> set_pre_ordre(pre_ordre.begin(), pre_ordre.end()) ;
+
+    if (set_pre_ordre.size() != pre_ordre.size()) return false ;
+
+    return set_en_ordre == set_pre_ordre ;
+
 }
 
 /**
@@ -112,25 +164,36 @@ ArbreBinaire<V>::construireSousArbre(const std::vector<V>& en_ordre, size_t deo,
 }
 
 /**
- * Fonction auxiliaire de validation des listes d'initialisation du constructeur.  Les deux visites doivent contenir
- * le même nombre d'éléments, doivent avoir les mêmes éléments et ne peuvent comporter de doublons.
+ * Méthode auxiliaire récursive pour le constructeur copie: Copie profonde d'un sous-arbre
  * @tparam V
- * @param en_ordre Vecteur de la visite en ordre
- * @param pre_ordre Vecteur de la visite pré ordre
- * @return
+ * @param rhs_root Adresse de la racine du sous-arbre à copier
+ * @return Adresse de la racine de la copie profonde
+ * @except Utilise new, donc bad_alloc
  */
 template<typename V>
-bool ArbreBinaire<V>::listes_valides(std::vector<V> en_ordre, std::vector<V> pre_ordre) {
-    if (en_ordre.size() != pre_ordre.size()) return false ;
+typename ArbreBinaire<V>::Arbre *ArbreBinaire<V>::copierLeSousArbreEnPreOrdre(ArbreBinaire::Arbre *rhs_root) {
+    if (!rhs_root) return nullptr ;
 
-    std::set<V> set_en_ordre(en_ordre.begin(), en_ordre.end()) ;
-    std::set<V> set_pre_ordre(pre_ordre.begin(), pre_ordre.end()) ;
-
-    if (set_pre_ordre.size() != pre_ordre.size()) return false ;
-
-    return set_en_ordre == set_pre_ordre ;
-
+    auto retval = new Arbre(rhs_root->valeur) ;
+    retval->gauche = copierLeSousArbreEnPreOrdre(rhs_root->gauche) ;
+    retval->droite = copierLeSousArbreEnPreOrdre(rhs_root->droite) ;
+    return retval ;
 }
+
+/**
+ * Méthode auxiliaire récursive pour de destructeur: désallocation des noeuds d'un sous-arbre
+ * @tparam V
+ * @param root Racine du sous-arbre à détruire.
+ */
+template<typename V>
+void ArbreBinaire<V>::detruireLeSousArbreEnPostOrdre(Arbre* root) {
+    if (!root) return ;
+
+    detruireLeSousArbreEnPostOrdre(root->gauche) ;
+    detruireLeSousArbreEnPostOrdre(root->droite) ;
+    delete root ;
+}
+
 
 /**
  * Fonction récursive auxiliaire pour la visite en ordre.
@@ -156,73 +219,14 @@ void ArbreBinaire<V>::visiterEnOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::
  * est vide.
  */
 template<typename V>
-void ArbreBinaire<V>::visiterPreOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::vector<V> &resultat) const {
+void ArbreBinaire<V>::visiterEnPreOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::vector<V> &resultat) const {
     if (root == nullptr) return ;
 
     resultat.push_back(root->valeur) ;
-    visiterPreOrdreLeSousArbre(root->gauche, resultat) ;
-    visiterPreOrdreLeSousArbre(root->droite, resultat) ;
+    visiterEnPreOrdreLeSousArbre(root->gauche, resultat) ;
+    visiterEnPreOrdreLeSousArbre(root->droite, resultat) ;
 }
 
-/**
- * Constructeur de copie.
- * @tparam V
- * @param source Arbre à copier.
- * @except Utilise new, donc bad_alloc est possible
- */
-template<typename V>
-ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSousArbreEnPreOrdre(source.racine)) {}
-
-/**
- * Destructeur.
- * @tparam V
- */
-template<typename V>
-ArbreBinaire<V>::~ArbreBinaire() {
-    detruireLeSousArbreEnPostOrdre(racine) ;
-}
-
-/**
- * Opérateur d'assignation en sémantique copy-swap.
- * @tparam V
- * @param rhs Membre de droite de l'assignation.
- * @return L'objet courant après l'assignation.
- */
-template<typename V>
-ArbreBinaire<V> &ArbreBinaire<V>::operator=(ArbreBinaire<V> rhs) {
-    std::swap(racine, rhs.racine) ;
-    return *this ;
-}
-
-/**
- * Méthode auxiliaire récursive pour le constructeur copie: Copie profonde d'un sous-arbre
- * @tparam V
- * @param rhs_root Adresse de la racine du sous-arbre à copier
- * @return Adresse de la racine de la copie profonde
- * @except Utilise new, donc bad_alloc
- */
-template<typename V>
-typename ArbreBinaire<V>::Arbre *ArbreBinaire<V>::copierLeSousArbreEnPreOrdre(ArbreBinaire::Arbre *rhs_root) {
-    if (!rhs_root) return nullptr ;
-
-    auto retval = new Arbre(rhs_root->valeur) ;
-    retval->gauche = copierLeSousArbreEnPreOrdre(rhs_root->gauche) ;
-    retval->droite = copierLeSousArbreEnPreOrdre(rhs_root->droite) ;
-    return retval ;
-}
-
-/**
- * Méthode auxiliaire récursive pour de destructeur: désallocation des noeuds d'un sous-arbre
- * @tparam V
- * @param root Racine du sous-arbre à détruire.
- */
-template<typename V>
-void ArbreBinaire<V>::detruireLeSousArbreEnPostOrdre(Arbre* root) {
-    if (!root) return ;
-    detruireLeSousArbreEnPostOrdre(root->gauche) ;
-    detruireLeSousArbreEnPostOrdre(root->droite) ;
-    delete root ;
-}
 
 
 
