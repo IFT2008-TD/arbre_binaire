@@ -22,7 +22,7 @@ ArbreBinaire<V>::ArbreBinaire(std::initializer_list<V> liste_en_ordre, std::init
 
 
     if (!listes_valides(en_ordre, pre_ordre)) throw std::invalid_argument("Construction impossible") ;
-    racine = construireSousArbre(en_ordre, 0, en_ordre.size(), pre_ordre, 0) ;
+    racine = nullptr ;
 
 }
 
@@ -33,7 +33,7 @@ ArbreBinaire<V>::ArbreBinaire(std::initializer_list<V> liste_en_ordre, std::init
  * @except Utilise new, donc bad_alloc est possible
  */
 template<typename V>
-ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSousArbreEnPreOrdre(source.racine)) {}
+ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(nullptr) {}
 
 /**
  * Destructeur.
@@ -41,7 +41,7 @@ ArbreBinaire<V>::ArbreBinaire(const ArbreBinaire<V> &source) : racine(copierLeSo
  */
 template<typename V>
 ArbreBinaire<V>::~ArbreBinaire() {
-    detruireLeSousArbreEnPostOrdre(racine) ;
+
 }
 
 /**
@@ -52,7 +52,7 @@ ArbreBinaire<V>::~ArbreBinaire() {
  */
 template<typename V>
 ArbreBinaire<V> &ArbreBinaire<V>::operator=(ArbreBinaire<V> rhs) {
-    std::swap(racine, rhs.racine) ;
+
     return *this ;
 }
 
@@ -67,7 +67,7 @@ ArbreBinaire<V> &ArbreBinaire<V>::operator=(ArbreBinaire<V> rhs) {
 template<typename V>
 std::vector<V> ArbreBinaire<V>::visiterEnOrdre() const {
     std::vector<V> resultat ;
-    visiterEnOrdreLeSousArbre(racine, resultat) ;
+
 
     return resultat ;
 }
@@ -82,7 +82,7 @@ std::vector<V> ArbreBinaire<V>::visiterEnOrdre() const {
 template<typename V>
 std::vector<V> ArbreBinaire<V>::visiterPreOrdre() const {
     std::vector<V> resultat ;
-    visiterEnPreOrdreLeSousArbre(racine, resultat) ;
+
 
     return resultat ;
 }
@@ -101,14 +101,7 @@ std::vector<V> ArbreBinaire<V>::visiterParNiveau() const {
 
     if (!racine) return resultat ;
 
-    attente.push(racine) ;
-    while (!attente.empty()) {
-        auto prochain = attente.front() ;
-        resultat.push_back(prochain->valeur) ;
-        attente.pop() ;
-        if (prochain->gauche) attente.push(prochain->gauche) ;
-        if (prochain->droite) attente.push(prochain->droite) ;
-    }
+
     return resultat ;
 }
 
@@ -149,18 +142,9 @@ template<typename V>
 typename ArbreBinaire<V>::Arbre *
 ArbreBinaire<V>::construireSousArbre(const std::vector<V>& en_ordre, size_t deo, size_t leo, const std::vector<V>& pre_ordre,
                                      size_t dpo) {
-    if (leo == 0) return nullptr ;
 
-    V element_racine = pre_ordre.at(dpo) ;
-    auto lg = static_cast<size_t>(std::find(en_ordre.begin(), en_ordre.end(), element_racine) - en_ordre.begin()) - deo ;
-    if (lg >= leo) throw std::runtime_error("construireSousArbre: racine non trouvée.") ;
-    size_t ld = leo - lg - 1 ;
 
-    auto* root = new Arbre(element_racine) ;
-    root->gauche = construireSousArbre(en_ordre, deo, lg, pre_ordre, 1+dpo) ;
-    root->droite = construireSousArbre(en_ordre, deo+lg+1, ld, pre_ordre, 1+dpo+lg) ;
-
-    return root ;
+    return nullptr ;
 }
 
 /**
@@ -172,12 +156,9 @@ ArbreBinaire<V>::construireSousArbre(const std::vector<V>& en_ordre, size_t deo,
  */
 template<typename V>
 typename ArbreBinaire<V>::Arbre *ArbreBinaire<V>::copierLeSousArbreEnPreOrdre(ArbreBinaire::Arbre *rhs_root) {
-    if (!rhs_root) return nullptr ;
 
-    auto retval = new Arbre(rhs_root->valeur) ;
-    retval->gauche = copierLeSousArbreEnPreOrdre(rhs_root->gauche) ;
-    retval->droite = copierLeSousArbreEnPreOrdre(rhs_root->droite) ;
-    return retval ;
+
+    return nullptr ;
 }
 
 /**
@@ -187,11 +168,7 @@ typename ArbreBinaire<V>::Arbre *ArbreBinaire<V>::copierLeSousArbreEnPreOrdre(Ar
  */
 template<typename V>
 void ArbreBinaire<V>::detruireLeSousArbreEnPostOrdre(Arbre* root) {
-    if (!root) return ;
 
-    detruireLeSousArbreEnPostOrdre(root->gauche) ;
-    detruireLeSousArbreEnPostOrdre(root->droite) ;
-    delete root ;
 }
 
 
@@ -204,11 +181,7 @@ void ArbreBinaire<V>::detruireLeSousArbreEnPostOrdre(Arbre* root) {
  */
 template<typename V>
 void ArbreBinaire<V>::visiterEnOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::vector<V> &resultat) const {
-    if (root == nullptr) return ;
 
-    visiterEnOrdreLeSousArbre(root->gauche, resultat) ;
-    resultat.push_back(root->valeur) ;
-    visiterEnOrdreLeSousArbre(root->droite, resultat) ;
 }
 
 /**
@@ -220,11 +193,7 @@ void ArbreBinaire<V>::visiterEnOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::
  */
 template<typename V>
 void ArbreBinaire<V>::visiterEnPreOrdreLeSousArbre(ArbreBinaire::Arbre *root, std::vector<V> &resultat) const {
-    if (root == nullptr) return ;
 
-    resultat.push_back(root->valeur) ;
-    visiterEnPreOrdreLeSousArbre(root->gauche, resultat) ;
-    visiterEnPreOrdreLeSousArbre(root->droite, resultat) ;
 }
 
 
