@@ -22,7 +22,8 @@ ArbreBinaire<V>::ArbreBinaire(std::initializer_list<V> liste_en_ordre, std::init
 
 
     if (!listes_valides(en_ordre, pre_ordre)) throw std::invalid_argument("Construction impossible") ;
-    racine = construireSousArbre(en_ordre, 0, en_ordre.size(), pre_ordre, 0) ;
+    // racine = construireSousArbre(en_ordre, 0, en_ordre.size(), pre_ordre, 0) ;
+    racine = construireSousArbreIter(en_ordre.begin(), en_ordre.end(), pre_ordre.begin(), pre_ordre.end()) ;
 
 }
 
@@ -161,6 +162,40 @@ ArbreBinaire<V>::construireSousArbre(const std::vector<V>& en_ordre, size_t deo,
     root->droite = construireSousArbre(en_ordre, deo+lg+1, ld, pre_ordre, 1+dpo+lg) ;
 
     return root ;
+}
+
+/**
+ * Fonction récursive auxiliaire au constructeur. Construit un sous-arbre à partir de deux vecteurs repérés par des
+ * itérateurs.
+ * @tparam V
+ * @param eo_deb Itérateur sur le début de la visite en-ordre
+ * @param eo_fin Itérateur sur la fin de la visite en-ordre
+ * @param po_deb Itérateur sur le début de la visite post-ordre
+ * @param po_fin Itérateur sur la fin de la visite post-ordre
+ * @return Adresse de la racine de l'arbre construit.
+ */
+template <typename V>
+typename ArbreBinaire<V>::Arbre *
+ArbreBinaire<V>::construireSousArbreIter(Iterateur eo_deb, Iterateur eo_fin, Iterateur po_deb, Iterateur po_fin) {
+    if ((eo_fin - eo_deb) != (po_fin - po_deb)) throw std::invalid_argument("Listes non-valides") ;
+
+    if (eo_fin == eo_deb) return nullptr ;
+    if (eo_fin - eo_deb == 1) return new Arbre(*eo_deb) ;
+
+    auto* root = new Arbre(*po_deb) ;
+    ++po_deb ;
+
+    auto po = po_deb ;
+    auto eo = eo_deb ;
+
+   do {
+        ++eo ;
+        ++po ;
+    } while (*eo != root->valeur) ;
+
+   root->gauche = construireSousArbreIter(eo_deb, eo, po_deb, po) ;
+   root->droite = construireSousArbreIter(eo + 1, eo_fin, po, po_fin) ;
+   return root ;
 }
 
 /**

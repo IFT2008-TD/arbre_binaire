@@ -20,6 +20,8 @@ class ArbreBinaire {
 
 private:
 
+    typedef  typename std::vector<V>::iterator Iterateur ;
+
     // Type privé Arbre: tout arbre binaire est un sommet comportant deux sous-arbres.
 
     struct Arbre {
@@ -54,6 +56,7 @@ private:
 
     static bool listes_valides(std::vector<V> en_ordre, std::vector<V> pre_ordre) ;
     Arbre*      construireSousArbre(const std::vector<V>& en_ordre, size_t deo, size_t leo, const std::vector<V>& pre_ordre, size_t dpo) ;
+    Arbre       *construireSousArbreIter(Iterateur eo_deb, Iterateur eo_fin, Iterateur po_deb, Iterateur po_fin) ;
     Arbre*      copierLeSousArbreEnPreOrdre(Arbre* rhs_root) ;
     void        detruireLeSousArbreEnPostOrdre(Arbre* root) ;
 
@@ -68,6 +71,7 @@ private:
     // Le seul attribut: la racine du sommet.
 
     Arbre * racine ;
+
 
 
 };
